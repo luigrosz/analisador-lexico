@@ -1,0 +1,16 @@
+int main() {
+  float valor1 = 10.5
+  int contador = 0
+
+  /* Este é um bloco de
+  comentário de múltiplas linhas */
+
+  if (contador < 10) {
+    contador = contador + 1
+    while (contador < 5) {
+      algo()
+    }
+  } else {
+    return 0
+  }
+}
