@@ -17,7 +17,7 @@
 #define T_FIM_EQ 12
 
 enum Estados {
-  Q0 = 0,
+  Q0,
   Q1,
   Q2,
   Q3,
@@ -30,88 +30,46 @@ enum Estados {
   Q10,
   Q11,
   Q12,
-  Q13,
-  Q14,
-  Q15,
-  Q16,
-  Q17,
-  Q18,
-  Q19,
-  Q20,
-  Q21,
-  Q22,
-  Q23,
-  Q24,
-  Q25,
-  Q26,
-  Q27,
-  Q28,
-  Q29,
-  Q30,
-  Q31,
-  Q32,
-  Q33,
-  Q34,
-  Q35,
-  Q36,
-  Q37,
-  Q38,
-  Q39,
-  Q40,
-  Q41,
-  Q42,
-  Q43,
-  Q44,
-  Q45,
-  Q46,
-  Q47,
-  Q48,
-  Q49,
-  Q50,
-  Q51,
-  Q52,
-  Q53,
-  Q54,
-  Q55,
-  Q56,
   NUM_ESTADOS
 };
 
 enum Colunas {
   C_LETRA,
   C_DIGITO,
-  C_MAIS_MENOS,
-  C_MULT,
-  C_DIV,
-  C_MENOR_MAIOR_IGUAL_EXC,
-  C_PONTO,
   C_UNDER,
+  C_MAIS,
+  C_DIV,
+  C_MENOS,
+  C_MULT,
   C_LBRACE,
   C_RBRACE,
   C_LPAREN,
   C_RPAREN,
+  C_PONTO,
+  C_MENOR,
+  C_MAIOR,
+  C_IGUAL,
+  C_EXC,
   C_ESPACO,
   C_OUTRO
 };
-#define NUM_COLUNAS 14
+#define NUM_COLUNAS 18
 
 int get_coluna(char c) {
   if (isalpha(c))
     return C_LETRA;
   if (isdigit(c))
     return C_DIGITO;
-  if (c == '+' || c == '-')
-    return C_MAIS_MENOS;
-  if (c == '*')
-    return C_MULT;
-  if (c == '/')
-    return C_DIV;
-  if (c == '<' || c == '>' || c == '=' || c == '!')
-    return C_MENOR_MAIOR_IGUAL_EXC;
-  if (c == '.')
-    return C_PONTO;
   if (c == '_')
     return C_UNDER;
+  if (c == '+')
+    return C_MAIS;
+  if (c == '/')
+    return C_DIV;
+  if (c == '-')
+    return C_MENOS;
+  if (c == '*')
+    return C_MULT;
   if (c == '{')
     return C_LBRACE;
   if (c == '}')
@@ -120,6 +78,16 @@ int get_coluna(char c) {
     return C_LPAREN;
   if (c == ')')
     return C_RPAREN;
+  if (c == '.')
+    return C_PONTO;
+  if (c == '<')
+    return C_MENOR;
+  if (c == '>')
+    return C_MAIOR;
+  if (c == '=')
+    return C_IGUAL;
+  if (c == '!')
+    return C_EXC;
   if (isspace(c))
     return C_ESPACO;
   return C_OUTRO;
@@ -139,21 +107,27 @@ void inicializar_dfa() {
 
   tabela_transicao[Q0][C_LETRA] = Q1;
   tabela_transicao[Q0][C_DIGITO] = Q2;
-  tabela_transicao[Q0][C_MAIS_MENOS] = Q2;
-  tabela_transicao[Q0][C_MULT] = Q3;
+  tabela_transicao[Q0][C_MAIS] = Q3;
   tabela_transicao[Q0][C_DIV] = Q4;
-  tabela_transicao[Q0][C_MENOR_MAIOR_IGUAL_EXC] = Q3;
+  tabela_transicao[Q0][C_MENOS] = Q3;
+  tabela_transicao[Q0][C_MULT] = Q3;
   tabela_transicao[Q0][C_LBRACE] = Q5;
   tabela_transicao[Q0][C_RBRACE] = Q6;
   tabela_transicao[Q0][C_LPAREN] = Q7;
   tabela_transicao[Q0][C_RPAREN] = Q8;
+  tabela_transicao[Q0][C_MENOR] = Q3;
+  tabela_transicao[Q0][C_MAIOR] = Q3;
+  tabela_transicao[Q0][C_IGUAL] = Q3;
+  tabela_transicao[Q0][C_EXC] = Q3;
   tabela_transicao[Q0][C_ESPACO] = Q0;
+  tokens_finais[Q0] = 0;
 
   tabela_transicao[Q1][C_LETRA] = Q1;
   tabela_transicao[Q1][C_DIGITO] = Q1;
   tabela_transicao[Q1][C_UNDER] = Q1;
   tokens_finais[Q1] = T_IDENTIFICADOR;
 
+  tabela_transicao[Q2][C_LETRA] = Q2;
   tabela_transicao[Q2][C_DIGITO] = Q2;
   tabela_transicao[Q2][C_PONTO] = Q9;
   tokens_finais[Q2] = T_NUMERAL;
@@ -164,8 +138,11 @@ void inicializar_dfa() {
   tokens_finais[Q4] = T_OPERADOR;
 
   tokens_finais[Q5] = T_INICIO_ESCOPO;
+
   tokens_finais[Q6] = T_FIM_ESCOPO;
+
   tokens_finais[Q7] = T_INICIO_EQ;
+
   tokens_finais[Q8] = T_FIM_EQ;
 
   tabela_transicao[Q9][C_DIGITO] = Q9;
@@ -173,22 +150,43 @@ void inicializar_dfa() {
 
   tabela_transicao[Q10][C_LETRA] = Q10;
   tabela_transicao[Q10][C_DIGITO] = Q10;
-  tabela_transicao[Q10][C_MAIS_MENOS] = Q10;
-  tabela_transicao[Q10][C_DIV] = Q10;
-  tabela_transicao[Q10][C_MENOR_MAIOR_IGUAL_EXC] = Q10;
-  tabela_transicao[Q10][C_PONTO] = Q10;
   tabela_transicao[Q10][C_UNDER] = Q10;
+  tabela_transicao[Q10][C_MAIS] = Q10;
+  tabela_transicao[Q10][C_DIV] = Q10;
+  tabela_transicao[Q10][C_MENOS] = Q10;
+  tabela_transicao[Q10][C_MULT] = Q11;
   tabela_transicao[Q10][C_LBRACE] = Q10;
   tabela_transicao[Q10][C_RBRACE] = Q10;
   tabela_transicao[Q10][C_LPAREN] = Q10;
   tabela_transicao[Q10][C_RPAREN] = Q10;
+  tabela_transicao[Q10][C_PONTO] = Q10;
+  tabela_transicao[Q10][C_MENOR] = Q10;
+  tabela_transicao[Q10][C_MAIOR] = Q10;
+  tabela_transicao[Q10][C_IGUAL] = Q10;
+  tabela_transicao[Q10][C_EXC] = Q10;
   tabela_transicao[Q10][C_ESPACO] = Q10;
   tabela_transicao[Q10][C_OUTRO] = Q10;
-  tabela_transicao[Q10][C_MULT] = Q11;
+  tokens_finais[Q10] = 0;
 
   tabela_transicao[Q11][C_LETRA] = Q10;
-  tabela_transicao[Q11][C_MULT] = Q11;
+  tabela_transicao[Q11][C_DIGITO] = Q10;
+  tabela_transicao[Q11][C_UNDER] = Q10;
+  tabela_transicao[Q11][C_MAIS] = Q10;
   tabela_transicao[Q11][C_DIV] = Q12;
+  tabela_transicao[Q11][C_MENOS] = Q10;
+  tabela_transicao[Q11][C_MULT] = Q11;
+  tabela_transicao[Q11][C_LBRACE] = Q10;
+  tabela_transicao[Q11][C_RBRACE] = Q10;
+  tabela_transicao[Q11][C_LPAREN] = Q10;
+  tabela_transicao[Q11][C_RPAREN] = Q10;
+  tabela_transicao[Q11][C_PONTO] = Q10;
+  tabela_transicao[Q11][C_MENOR] = Q10;
+  tabela_transicao[Q11][C_MAIOR] = Q10;
+  tabela_transicao[Q11][C_IGUAL] = Q10;
+  tabela_transicao[Q11][C_EXC] = Q10;
+  tabela_transicao[Q11][C_ESPACO] = Q10;
+  tabela_transicao[Q11][C_OUTRO] = Q10;
+  tokens_finais[Q11] = 0;
 
   tokens_finais[Q12] = T_COMENTARIO;
 }
@@ -250,9 +248,10 @@ int main(int argc, char *argv[]) {
 
   while ((c = fgetc(arquivo_entrada)) != EOF) {
     int coluna = get_coluna(c);
-    int proximo_estado = tabela_transicao[estado_atual][coluna];
+    int proximo_estado =
+        (estado_atual >= 0) ? tabela_transicao[estado_atual][coluna] : -1;
 
-    if (proximo_estado == -1 || (estado_atual == Q0 && coluna == C_ESPACO)) {
+    if (proximo_estado == -1) {
       if (lexema_idx > 0) {
         lexema_atual[lexema_idx] = '\0';
         int token_final = tokens_finais[estado_atual];
@@ -272,13 +271,15 @@ int main(int argc, char *argv[]) {
       memset(lexema_atual, 0, sizeof(lexema_atual));
 
       estado_atual = tabela_transicao[Q0][coluna];
-      if (estado_atual != Q0) {
+      if (estado_atual != Q0 && estado_atual != -1) {
         lexema_atual[lexema_idx++] = c;
       }
 
     } else {
       estado_atual = proximo_estado;
-      lexema_atual[lexema_idx++] = c;
+      if (!isspace(c) || estado_atual == Q10 || estado_atual == Q11) {
+        lexema_atual[lexema_idx++] = c;
+      }
     }
   }
 
